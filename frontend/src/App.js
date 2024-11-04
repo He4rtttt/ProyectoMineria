@@ -1,73 +1,31 @@
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './AuthContext';
+import Login from './components/Login';
 import RegistroProfesor from './components/RegistroProfesor';
 import Profesor from './components/Profesor';
+import LoginEstudiante from './components/LoginEstudiante';
+import Juego from './components/Juego';
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<RegistroProfesor />} />
-          <Route path="/crear-partida" element={<Profesor />} />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <h1>Juego Educativo</h1>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/registrar" element={<RegistroProfesor />} />
+            <Route path="/crear-partida" element={<Profesor />} />
+            <Route path="/login-estudiante/:partidaId" element={<LoginEstudiante />} />
+            <Route path="/juego/:partidaId" element={<Juego />} />
+            <Route path="/" element={<h2>Bienvenido, por favor inicie sesión.</h2>} />
+          </Routes>
+          <a href="/login">Iniciar Sesión</a>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
 export default App;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import socket from './socket';
-// import Juego from './components/Juego';
-
-// function App() {
-//   const [resultado, setResultado] = useState('');
-
-//   useEffect(() => {
-//     // Escuchar el resultado de la verificación desde el backend
-//     socket.on('resultadoVerificacion', (data) => {
-//       setResultado(data.mensaje);
-//     });
-
-//     return () => {
-//       socket.off('resultadoVerificacion');
-//     };
-//   }, []);
-
-//   return (
-//     <div className="App">
-//       <h1>Juego Educativo</h1>
-//       <Juego />
-//       <p>{resultado}</p>
-//     </div>
-//   );
-// }
-
-// export default App;
