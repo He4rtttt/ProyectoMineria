@@ -77,11 +77,11 @@ const socketHandler = (io) => {
         const pictograma = estudiante.pictogramas[indiceActual];
     
         if (pictograma) {
-          const esCorrecto = 
-            respuesta.color === pictograma.color &&
-            respuesta.numeroClase === pictograma.numeroClase &&
-            respuesta.simbolo === pictograma.simbolo;
-    
+          const esCorrecto =
+          respuesta.color.trim().toLowerCase() === pictograma.color.trim().toLowerCase() &&
+          parseInt(respuesta.numeroClase, 10) === pictograma.numeroClase &&
+          respuesta.simbolo.trim().toLowerCase() === pictograma.simbolo.trim().toLowerCase();
+
           // Emitir el resultado de la verificación
           socket.emit("respuestaVerificada", { esCorrecto, respuestaCorrecta: pictograma });
     
