@@ -1,10 +1,9 @@
-// routes/profesorRoutes.js
 const express = require("express");
-const { registrarProfesor, login} = require("../controllers/profesorController");
+const { registrarProfesor, login } = require("../controllers/profesorController");
 const router = express.Router();
 
-router.post("/api/profesores", registrarProfesor);
-router.post("/api/profesores/login", login);
-
+router.post("/", registrarProfesor);         // POST /api/profesores
+router.post("/login", login);                // POST /api/profesores/login
 
 module.exports = router;
+

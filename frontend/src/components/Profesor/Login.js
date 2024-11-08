@@ -8,7 +8,7 @@ function Login({ setProfesorId }) {
 
   const handleLogin = async () => {
     try {
-      const { data } = await axios.post("http://localhost:5000/api/profesor/login", { email, password });
+      const { data } = await axios.post("http://localhost:3001/api/profesores/login", { email, password });
       setProfesorId(data.profesorId); // Guarda el ID del profesor en el estado principal
     } catch (error) {
       alert("Error al iniciar sesión");

@@ -1,23 +1,23 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const cors = require("cors");  // Importa el paquete CORS
 const connectDB = require("./config/db");
-const profesorRoutes = require("./routes/profesorRoutes");
-const partidaRoutes = require("./routes/partidaRoutes");
+const routes = require("./routes");
 const socketHandler = require("./socket");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "http://localhost:3000" } });
-const pictogramaRoutes = require("./routes/pictogramaRoutes");
+const io = new Server(server, { cors: { origin: "*" } });  // Permitir CORS desde cualquier origen
 
 connectDB();
 app.use(express.json());
 
+// Configura CORS en Express para aceptar cualquier origen
+app.use(cors());
 
-app.use(profesorRoutes);
-app.use(partidaRoutes);
-app.use(pictogramaRoutes); // Nueva ruta para pictogramas
+// Usar el prefijo '/api' para todas las rutas de la API
+app.use("/api", routes);
 
 socketHandler(io);
 
