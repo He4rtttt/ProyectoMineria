@@ -8,7 +8,7 @@ const socketHandler = (io) => {
   io.on("connection", (socket) => {
     console.log("Usuario conectado:", socket.id);
 
-    socket.on("iniciarPartida", async ({ profesorId, tiempoPorPictograma, numeroDePictogramas }) => {
+    socket.on("crearPartida", async ({ profesorId, tiempoPorPictograma, numeroDePictogramas }) => {
       try {
         console.log("Iniciando partida con profesorId:", profesorId, "tiempoPorPictograma:", tiempoPorPictograma, "numeroDePictogramas:", numeroDePictogramas);
         
@@ -28,7 +28,7 @@ const socketHandler = (io) => {
     
         await partida.save();
         const linkPartida = `http://localhost:3000/partida/${partida.partidaId}`;
-        socket.emit("partidaIniciada", { mensaje: "Partida creada", link: linkPartida });
+        socket.emit("partidaCreada", { mensaje: "Partida creada", link: linkPartida });
       } catch (error) {
         console.error("Error en iniciarPartida:", error);
         socket.emit("error", { mensaje: "Error al iniciar la partida" });
