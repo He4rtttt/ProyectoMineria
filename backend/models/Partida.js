@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const partidaSchema = new mongoose.Schema({
-  partidaId: { type: String, required: true },
-  profesor: { type: mongoose.Schema.Types.ObjectId, ref: 'Profesor', required: true },
-  tiempoPorPartida: { type: Number, required: true },
-  tiempoPorCartel: { type: Number, required: true },
-  estudiantes: [{ type: String }], // Puedes modificarlo para almacenar más datos de cada estudiante
-  estado: { type: String, enum: ['activa', 'finalizada'], default: 'activa' },
+const PartidaSchema = new mongoose.Schema({
+  partidaId: String,
+  profesor: { type: mongoose.Schema.Types.ObjectId, ref: "Profesor" },
+  tiempoPorPictograma: Number,
+  numeroDePictogramas: Number,
+  estudiantes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Estudiante" }],
+  estado: { type: String, default: "activa" },
 });
 
-module.exports = mongoose.model('Partida', partidaSchema);
+module.exports = mongoose.model("Partida", PartidaSchema);

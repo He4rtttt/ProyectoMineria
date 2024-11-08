@@ -1,0 +1,9 @@
+[
+    { "nombreClase": "Pictograma 1", "color": "rojo", "numeroClase": 1, "simbolo": "estrella" },
+    { "nombreClase": "Pictograma 2", "color": "azul", "numeroClase": 2, "simbolo": "corazón" },
+    { "nombreClase": "Pictograma 3", "color": "verde", "numeroClase": 3, "simbolo": "sol" },
+    { "nombreClase": "Pictograma 4", "color": "amarillo", "numeroClase": 4, "simbolo": "luna" },
+    { "nombreClase": "Pictograma 5", "color": "naranja", "numeroClase": 5, "simbolo": "nube" },
+    { "nombreClase": "Pictograma 6", "color": "morado", "numeroClase": 6, "simbolo": "flor" }
+  ]
+  

@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const ProfesorSchema = new mongoose.Schema({
-  nombre: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // Añadir el campo de contraseña
+  nombre: String,
+  email: String,
+  password: String,
 });
 
-module.exports = mongoose.model('Profesor', ProfesorSchema);
+module.exports = mongoose.model("Profesor", ProfesorSchema);
