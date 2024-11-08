@@ -39,6 +39,11 @@ function CrearPartida() {
         <div>
           <h3>Enlace para alumnos:</h3>
           <p>{linkPartida}</p>
+          <h3>Enlace para alumnos:</h3>
+          <p>{linkPartida.slice(-6)}
+
+          </p>
+      
         </div>
       )}
     </div>

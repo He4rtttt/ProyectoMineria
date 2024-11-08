@@ -18,7 +18,7 @@ const socketHandler = (io) => {
         const pictogramas = await Pictograma.aggregate([{ $sample: { size: numeroDePictogramasInt } }]);
     
         const partida = new Partida({
-          partidaId: socket.id,
+          partidaId: socket.id.slice(-6),
           profesor: profesorId,
           tiempoPorPictograma,
           numeroDePictogramas: numeroDePictogramasInt,
@@ -121,6 +121,18 @@ const socketHandler = (io) => {
         console.error("Error en finalizarPartida:", error);
         socket.emit("error", { mensaje: "Error al finalizar la partida" });
       }
+    });
+
+    socket.on("validarCodigo", async (partidaId ) => {
+      const partida = await Partida.findOne({ partidaId});
+        if (!partida) {
+          socket.emit("resultado",  false);
+        
+        }
+        else {
+          socket.emit("resultado",  true);
+        }
+     
     });
 
     socket.on("disconnect", () => {
