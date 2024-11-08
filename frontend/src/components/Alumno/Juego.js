@@ -7,30 +7,28 @@ function Juego({ partidaId, alumnoId, pictogramas, tiempoPorPictograma }) {
   const [tiempoRestantePictograma, setTiempoRestantePictograma] = useState(tiempoPorPictograma);
   const [pictogramaActual, setPictogramaActual] = useState(0);
   const [puntaje, setPuntaje] = useState(0);
-  const [respuesta, setRespuesta] = useState({ color: "", numeroClase: "", simbolo: "" });
+  const [respuesta, setRespuesta] = useState({ colores: ["", "", "", ""], numeroClase: "", simbolo: "" });
   const [juegoTerminado, setJuegoTerminado] = useState(false);
   const [mostrarRespuesta, setMostrarRespuesta] = useState(false);
   const [respuestaCorrecta, setRespuestaCorrecta] = useState(null);
   const [contadorBloqueo, setContadorBloqueo] = useState(3);
 
-  // Función para verificar la respuesta actual y mostrar la ventana emergente
   const verificarRespuesta = useCallback(() => {
     if (juegoTerminado) return;
 
-    socket.emit("verificarSeleccion", { partidaId, alumnoId, respuesta });
+    const coloresFiltrados = respuesta.colores.filter((color) => color.trim() !== "");
+    socket.emit("verificarSeleccion", { partidaId, alumnoId, respuesta: { ...respuesta, colores: coloresFiltrados } });
     socket.once("respuestaVerificada", ({ esCorrecto, respuestaCorrecta }) => {
       if (esCorrecto) {
         setPuntaje((prev) => prev + 1);
       }
-      setRespuestaCorrecta(respuestaCorrecta); // Muestra la respuesta correcta
-      setMostrarRespuesta(true); // Activa el modal de respuesta
+      setRespuestaCorrecta(respuestaCorrecta);
+      setMostrarRespuesta(true);
     });
   }, [juegoTerminado, partidaId, alumnoId, respuesta]);
 
-  // Temporizador total que termina el juego
   useEffect(() => {
     if (juegoTerminado) return;
-
     const timerTotal = setInterval(() => {
       setTiempoRestanteTotal((prev) => {
         if (prev <= 1) {
@@ -41,41 +39,35 @@ function Juego({ partidaId, alumnoId, pictogramas, tiempoPorPictograma }) {
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timerTotal);
   }, [juegoTerminado]);
 
-  // Temporizador por pictograma
   useEffect(() => {
     if (juegoTerminado || mostrarRespuesta) return;
-
     const timerPictograma = setInterval(() => {
       setTiempoRestantePictograma((prev) => {
         if (prev <= 1) {
           clearInterval(timerPictograma);
-          verificarRespuesta(); // Verifica la respuesta cuando se agota el tiempo
+          verificarRespuesta();
           return tiempoPorPictograma;
         }
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timerPictograma);
   }, [pictogramaActual, juegoTerminado, mostrarRespuesta, verificarRespuesta, tiempoPorPictograma]);
 
-  // Cuenta regresiva de bloqueo después de mostrar la respuesta correcta
   useEffect(() => {
     if (!mostrarRespuesta) return;
-
     const countdown = setInterval(() => {
       setContadorBloqueo((prev) => {
         if (prev <= 1) {
           clearInterval(countdown);
           setMostrarRespuesta(false);
-          setContadorBloqueo(3); // Resetea el contador de bloqueo
+          setContadorBloqueo(3);
           if (pictogramaActual + 1 < pictogramas.length) {
             setPictogramaActual((prev) => prev + 1);
-            setRespuesta({ color: "", numeroClase: "", simbolo: "" });
+            setRespuesta({ colores: ["", "", "", ""], numeroClase: "", simbolo: "" });
             setTiempoRestantePictograma(tiempoPorPictograma);
           } else {
             setJuegoTerminado(true);
@@ -85,7 +77,6 @@ function Juego({ partidaId, alumnoId, pictogramas, tiempoPorPictograma }) {
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(countdown);
   }, [mostrarRespuesta, pictogramaActual, pictogramas.length, tiempoPorPictograma]);
 
@@ -102,15 +93,22 @@ function Juego({ partidaId, alumnoId, pictogramas, tiempoPorPictograma }) {
       <h2>Tiempo restante para este pictograma: {tiempoRestantePictograma}</h2>
       <h3>Pictograma: {pictograma.nombreClase}</h3>
 
-      <label>
-        Color:
-        <input
-          type="text"
-          value={respuesta.color}
-          onChange={(e) => setRespuesta({ ...respuesta, color: e.target.value })}
-          disabled={mostrarRespuesta}
-        />
-      </label>
+      {respuesta.colores.map((color, index) => (
+        <label key={index}>
+          Color {index + 1}:
+          <input
+            type="text"
+            value={color}
+            onChange={(e) => {
+              const newColores = [...respuesta.colores];
+              newColores[index] = e.target.value;
+              setRespuesta({ ...respuesta, colores: newColores });
+            }}
+            disabled={mostrarRespuesta}
+          />
+        </label>
+      ))}
+
       <label>
         Número de Clase:
         <input
@@ -131,7 +129,6 @@ function Juego({ partidaId, alumnoId, pictogramas, tiempoPorPictograma }) {
       </label>
       <button onClick={verificarRespuesta} disabled={mostrarRespuesta}>Verificar</button>
 
-      {/* Ventana emergente que muestra la respuesta correcta */}
       {mostrarRespuesta && (
         <div style={{
           position: "fixed",
@@ -144,7 +141,7 @@ function Juego({ partidaId, alumnoId, pictogramas, tiempoPorPictograma }) {
           boxShadow: "0 0 10px rgba(0, 0, 0, 0.25)"
         }}>
           <h3>Respuesta Correcta</h3>
-          <p>Color: {respuestaCorrecta.color}</p>
+          <p>Colores: {respuestaCorrecta.colors.join(", ")}</p>
           <p>Número de Clase: {respuestaCorrecta.numeroClase}</p>
           <p>Símbolo: {respuestaCorrecta.simbolo}</p>
           <p>Cambiando al siguiente en {contadorBloqueo}...</p>

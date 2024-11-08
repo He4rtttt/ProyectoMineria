@@ -71,30 +71,41 @@ const socketHandler = (io) => {
       try {
         const estudiante = await Estudiante.findById(alumnoId).populate("pictogramas");
         const partida = await Partida.findOne({ partidaId });
-
+    
         if (!estudiante || !partida) {
           socket.emit("errorJuego", { mensaje: "Error al verificar la respuesta" });
           return;
         }
-
+    
         const indiceActual = estudiante.indice || 0;
         const pictograma = estudiante.pictogramas[indiceActual];
-
+    
         if (pictograma) {
+          const coloresRespuesta = respuesta.colores.filter((color) => color.trim() !== "");
+          if (coloresRespuesta.length === 0) {
+            socket.emit("errorJuego", { mensaje: "Debe ingresar al menos un color" });
+            return;
+          }
+    
+          // Verificar que los colores coincidan
+          const coloresCorrectos = pictograma.colors.every((color, index) =>
+            color.trim().toLowerCase() === (coloresRespuesta[index] || "").trim().toLowerCase()
+          );
+    
           const esCorrecto =
-            respuesta.color.trim().toLowerCase() === pictograma.color.trim().toLowerCase() &&
+            coloresCorrectos &&
             parseInt(respuesta.numeroClase, 10) === pictograma.numeroClase &&
             respuesta.simbolo.trim().toLowerCase() === pictograma.simbolo.trim().toLowerCase();
-
+    
           // Emitir el resultado de la verificación antes de avanzar el índice
           socket.emit("respuestaVerificada", { esCorrecto, respuestaCorrecta: pictograma });
-
-          // Solo incrementar el índice si quedan más pictogramas y avanzar manualmente en el frontend
+    
+          // Solo incrementar el índice si quedan más pictogramas
           estudiante.indice += 1;
           if (esCorrecto) {
             estudiante.puntaje += 1;
           }
-
+    
           await estudiante.save();
         } else {
           socket.emit("errorJuego", { mensaje: "No hay más pictogramas para verificar" });
@@ -102,8 +113,7 @@ const socketHandler = (io) => {
       } catch (error) {
         socket.emit("errorJuego", { mensaje: "Error al verificar la respuesta" });
       }
-    });
-   
+    });    
     
     socket.on("finalizarPartida", async ({ partidaId }) => {
       try {
