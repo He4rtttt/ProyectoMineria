@@ -11,17 +11,21 @@ const socketHandler = (io) => {
     socket.on("iniciarPartida", async ({ profesorId, tiempoPorPictograma, numeroDePictogramas }) => {
       try {
         console.log("Iniciando partida con profesorId:", profesorId, "tiempoPorPictograma:", tiempoPorPictograma, "numeroDePictogramas:", numeroDePictogramas);
-        const pictogramas = await Pictograma.aggregate([{ $sample: { size: numeroDePictogramas } }]);
-
+        
+        // Asegurarse de que numeroDePictogramas es un entero
+        const numeroDePictogramasInt = parseInt(numeroDePictogramas, 10);
+    
+        const pictogramas = await Pictograma.aggregate([{ $sample: { size: numeroDePictogramasInt } }]);
+    
         const partida = new Partida({
           partidaId: socket.id,
           profesor: profesorId,
           tiempoPorPictograma,
-          numeroDePictogramas,
+          numeroDePictogramas: numeroDePictogramasInt,
           estado: "activa",
           pictogramas,
         });
-
+    
         await partida.save();
         const linkPartida = `http://localhost:3000/partida/${partida.partidaId}`;
         socket.emit("partidaIniciada", { mensaje: "Partida creada", link: linkPartida });
@@ -30,6 +34,7 @@ const socketHandler = (io) => {
         socket.emit("error", { mensaje: "Error al iniciar la partida" });
       }
     });
+  
 
     socket.on("registroAlumno", async ({ partidaId, nombre }) => {
       try {
@@ -64,46 +69,41 @@ const socketHandler = (io) => {
 
     socket.on("verificarSeleccion", async ({ partidaId, alumnoId, respuesta }) => {
       try {
-        const estudiante = await Estudiante.findById(alumnoId).populate("pictogramas"); // Asegúrate de poblar los pictogramas específicos del estudiante
+        const estudiante = await Estudiante.findById(alumnoId).populate("pictogramas");
         const partida = await Partida.findOne({ partidaId });
-    
+
         if (!estudiante || !partida) {
           socket.emit("errorJuego", { mensaje: "Error al verificar la respuesta" });
           return;
         }
-    
-        // Índice actual del pictograma que se debe verificar
+
         const indiceActual = estudiante.indice || 0;
         const pictograma = estudiante.pictogramas[indiceActual];
-    
+
         if (pictograma) {
           const esCorrecto =
-          respuesta.color.trim().toLowerCase() === pictograma.color.trim().toLowerCase() &&
-          parseInt(respuesta.numeroClase, 10) === pictograma.numeroClase &&
-          respuesta.simbolo.trim().toLowerCase() === pictograma.simbolo.trim().toLowerCase();
+            respuesta.color.trim().toLowerCase() === pictograma.color.trim().toLowerCase() &&
+            parseInt(respuesta.numeroClase, 10) === pictograma.numeroClase &&
+            respuesta.simbolo.trim().toLowerCase() === pictograma.simbolo.trim().toLowerCase();
 
-          // Emitir el resultado de la verificación
+          // Emitir el resultado de la verificación antes de avanzar el índice
           socket.emit("respuestaVerificada", { esCorrecto, respuestaCorrecta: pictograma });
-    
-          // Incrementa el índice del estudiante sin importar si la respuesta fue correcta
+
+          // Solo incrementar el índice si quedan más pictogramas y avanzar manualmente en el frontend
           estudiante.indice += 1;
-    
-          // Si es correcto, aumenta también el puntaje
           if (esCorrecto) {
             estudiante.puntaje += 1;
           }
-    
-          // Guardar el estado actualizado del estudiante
+
           await estudiante.save();
         } else {
-          console.error(`No existe pictograma para el índice ${indiceActual}`);
           socket.emit("errorJuego", { mensaje: "No hay más pictogramas para verificar" });
         }
       } catch (error) {
-        console.error("Error en verificarSeleccion:", error);
         socket.emit("errorJuego", { mensaje: "Error al verificar la respuesta" });
       }
-    });    
+    });
+   
     
     socket.on("finalizarPartida", async ({ partidaId }) => {
       try {
