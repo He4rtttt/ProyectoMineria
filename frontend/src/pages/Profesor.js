@@ -21,3 +21,4 @@ function Profesor() {
     </div>
   );
 }
+export default Profesor;
