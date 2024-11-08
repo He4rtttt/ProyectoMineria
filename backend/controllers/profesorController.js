@@ -10,3 +10,11 @@ exports.registrarProfesor = async (req, res) => {
     res.status(500).json({ mensaje: "Error al registrar el profesor" });
   }
 };
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  const profesor = await Profesor.findOne({ email });
+  if (!profesor || profesor.password !== password) {
+    return res.status(401).json({ mensaje: "Credenciales incorrectas" });
+  }
+  res.json({ profesorId: profesor._id });
+};

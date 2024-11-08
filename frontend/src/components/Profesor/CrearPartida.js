@@ -2,23 +2,20 @@
 import React, { useState } from "react";
 import socket from "../../socket";
 
-function CrearPartida() {
+function CrearPartida({ profesorId }) { // Recibe profesorId como prop
   const [tiempoPorPictograma, setTiempoPorPictograma] = useState(30);
   const [numeroDePictogramas, setNumeroDePictogramas] = useState(5);
   const [linkPartida, setLinkPartida] = useState(null);
 
   const manejarCrearPartida = () => {
-    const profesorId = "6728dcdeec5efb67b97607fc"; // ID temporal para pruebas
+    socket.emit("crearPartida", { profesorId, tiempoPorPictograma, numeroDePictogramas });
 
-    socket.emit("iniciarPartida", { profesorId, tiempoPorPictograma, numeroDePictogramas });
-
-    socket.on("partidaIniciada", ({ mensaje, link }) => {
+    socket.on("partidaCreada", ({ mensaje, link }) => {
       setLinkPartida(link);
       alert(mensaje);
     });
 
     socket.on("error", ({ mensaje }) => {
-      console.error("Error en CrearPartida:", mensaje);
       alert(mensaje); 
     });
   };
